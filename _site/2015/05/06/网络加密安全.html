@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>网络传输加密安全</title>
+   <meta name="author" content="唐中良" />
+   <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/blog/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/blog/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+<!-- ClickTale Top part -->
+<script type="text/javascript">
+var WRInitTime=(new Date()).getTime();
+</script>
+<!-- ClickTale end of Top part -->
+
+<div class="site">
+  <div class="title">
+	  <a href="/blog">唐中良<a/>
+	  <a class="extra" href="/blog">首页</a>
+  </div>
+  
+  <div id="post">
+<h2 class="title">网络传输加密安全 </h2>
+<br/>	开放系统互联模型（OSI参考，open system interconnection）
+<br/>	应用层 ………………。计算机：应用程序，如FTP，SMTP，HTTP
+<br/>
+<br/>	表示层 ………………。计算机：编码方式，图像编解码、URL字段传输编码
+<br/>
+<br/>	会话层 ………………。计算机：建立会话，SESSION认证、断点续传
+<br/>
+<br/>	传输层 ………………。计算机：进程和端口
+<br/>
+<br/>	网络层…………………网络：路由器，防火墙、多层交换机
+<br/>
+<br/>	数据链路层 ……………网络：网卡，网桥，交换机
+<br/>
+<br/>	物理层…………………网络：中继器，集线器、网线、HUB
+<br/>
+<br/>	https是基于ssl的加密传输
+<br/>	首先发送者对自己要发送的数据进行单行加密，计算出数据的特征码，并且使用自己的私钥讲该段特征码进行加密，并且将其特征码附加至数据的尾部，之后在使用对称加密，随机生成一个加密密码，使用该密码对包含有特征码和数据这一整块进行加密，之后在使用接受者的公钥对随机生成的这个密码进行加密，附加至所有数据之后发送给接受者！
+<br/>
+<br/>	http是明文传输
+<br/>	POST和GET的差别其实是很大的。语义上，GET是获取指定URL上的资源，是读操作，重要的一点是不论对某个资源GET多少次，它的状态是不会改变的，在这个意义上，我们说GET是安全的（不是被密码学或者数据保护意义上的安全）。因为GET是安全的，所以GET返回的内容可以被浏览器，Cache服务器缓存起来（其中还有很多细节，但不影响这里的讨论）
+<br/>
+<br/>	TCP socket如何使用ssl加密
+<br/>	java封装了SSLSocket，开发者可以直接调用
+	<a href="http://my.oschina.net/itblog/blog/651608">java使用SSLSocket通信</a>
+
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/ubuntu%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E6%90%AD%E9%85%8Djekyll%E7%8E%AF%E5%A2%83.html">ubuntu如何正确搭配jekyll环境</a></li>
+    
+      <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/UDP%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90%E4%BB%A5%E5%8F%8A%E5%9C%A8java%E4%B8%AD%E7%9A%84%E4%BD%BF%E7%94%A8.html">UDP原理解析以及在java中的使用</a></li>
+    
+      <li><span>04 Apr 2015</span> &raquo; <a href="/2015/04/04/hello-world.html">你好，世界</a></li>
+    
+  </ul>
+</div>
+
+  <div class="contact">
+      
+  <!--</div>
+    <div class="rss">
+      <a href="/">
+	      <img src="/blog/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+    -->
+  </div>
+</div>
+
+<a href="http://github.com/tangzhongliang"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+<!-- ClickTale Bottom part -->
+<div id="ClickTaleDiv" style="display: none;"></div>
+<script type="text/javascript">
+if(document.location.protocol!='https:')
+  document.write(unescape("%3Cscript%20src='http://s.clicktale.net/WRb.js'%20type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+if(typeof ClickTale=='function') ClickTale(206,0.3,"www03");
+</script>
+<!-- ClickTale end of Bottom part -->
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6016902-1");
+pageTracker._trackPageview();
+</script>
+<!-- Google Analytics end -->
+
+</body>
+</html>

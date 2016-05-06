@@ -1,0 +1,14 @@
+---
+layout: post
+title: ubuntu如何正确搭配jekyll环境
+---
+<pre>
+sudo apt-get install ruby ruby-dev make gcc nodejs
+将gem的源库由Https改为http
+gem sources --remove https://rubygems.org/
+gem sources -a http://ruby.taobao.org/
+sudo gem install jekyll
+进入项目根目录执行命令
+jekyll serve
+在浏览器中访问http://localhost:4000/project/ project改为你的项目名称
+</pre>
