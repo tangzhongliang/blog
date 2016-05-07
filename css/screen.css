@@ -161,7 +161,6 @@ ul.posts {
 
   #post pre {
     border: 1px solid #ddd;
-    background-color: #eef;
     padding: 0 .4em;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -185,7 +184,7 @@ ul.posts {
     border: none;
     background-color: #eef;
     font-size: 85%;
-    border: 1px solid #ddd;
+    /*border: 1px solid #ddd;*/
     margin-top: 2em;
     }
 
