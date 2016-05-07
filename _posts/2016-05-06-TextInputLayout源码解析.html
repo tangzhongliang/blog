@@ -1,0 +1,192 @@
+---
+layout: post
+title: TextInputLayout源码解析
+---
+<pre>
+TextInputLayout的基本原理是:取消EditText的hint， 监听EditText的创建和输入内容的变化，更新Label的状态(x，y轴位置，颜色，缩小比例) ,然后通知TextInputLayout重新绘制
+CollapsingTextHelper类主要用来存储Label的状态，绘制Label,计算位置。
+巧妙的将动画和绘制分开，将Label的功能从EditText上剥离出来，交给父控件的帮助类处理
+</pre>
+<pre>
+
+以下是实现的详细过程
+初始化Label展开和折叠的区域
+<code>
+    @Override                                                                                                                                   
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {                                                        
+	super.onLayout(changed, left, top, right, bottom);                                                                                      
+
+	if (mEditText != null) {                                                                                                                
+	    final int l = mEditText.getLeft() + mEditText.getCompoundPaddingLeft();                                                             
+	    final int r = mEditText.getRight() - mEditText.getCompoundPaddingRight();                                                           
+
+	    mCollapsingTextHelper.setExpandedBounds(l,                                                                                          
+		    mEditText.getTop() + mEditText.getCompoundPaddingTop(),                                                                     
+		    r, mEditText.getBottom() - mEditText.getCompoundPaddingBottom());                                                           
+
+	    // Set the collapsed bounds to be the the full height (minus padding) to match the                                                  
+	    // EditText's editable area                                                                                                         
+	    mCollapsingTextHelper.setCollapsedBounds(l, getPaddingTop(),                                                                        
+		    r, bottom - top - getPaddingBottom());                                                                                      
+
+	    mCollapsingTextHelper.recalculate();                                                                                                
+	}                                                                                                                                       
+    }       
+<code>
+当EditText被添加父控件时，更新Label，label变化不需要动画。当EditText的输入内容发生变化时，更新Label，且label的变化需要时动画的
+当Edittext内容不为空或聚焦时，折叠Label。反之，展开Label
+<code>
+@Override
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+        if (child instanceof EditText) {
+            setEditText((EditText) child);
+            super.addView(child, 0, updateEditTextMargin(params));
+        } else {
+            // Carry on adding the View...
+            super.addView(child, index, params);
+        }   
+    }   
+
+// 是否需要动画
+ private void setEditText(EditText editText) {
+	.......
+	// Add a TextWatcher so that we know when the text input has changed
+        mEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                updateLabelVisibility(true);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+	.......
+
+        // Update the label visibility with no animation
+        updateLabelVisibility(false);
+    }
+
+
+    // 当Edittext内容不为空或聚焦时，折叠Label。反之，展开Label
+    private void updateLabelVisibility(boolean animate) {
+        
+	......
+
+        if (hasText || isFocused) {
+            // We should be showing the label so do so if it isn't already
+            collapseHint(animate);
+        } else {
+            // We should not be showing the label so hide it
+            expandHint(animate);
+        }
+    }
+</code>
+到此为止发现collapseHint,expandHint是实现Label浮动的关键代码，下面看一看代码详情
+<code>
+    private void collapseHint(boolean animate) {
+        if (mAnimator != null && mAnimator.isRunning()) {
+            mAnimator.cancel();
+        }
+        if (animate && mHintAnimationEnabled) {
+            animateToExpansionFraction(1f);
+        } else {
+            mCollapsingTextHelper.setExpansionFraction(1f);
+        }
+    }
+
+    private void expandHint(boolean animate) {
+        if (mAnimator != null && mAnimator.isRunning()) {
+            mAnimator.cancel();
+        }
+        if (animate && mHintAnimationEnabled) {
+            animateToExpansionFraction(0f);
+        } else {
+            mCollapsingTextHelper.setExpansionFraction(0f);
+        }
+    }
+
+    private void animateToExpansionFraction(final float target) {
+        if (mCollapsingTextHelper.getExpansionFraction() == target) {
+            return;
+        }
+        if (mAnimator == null) {
+            mAnimator = ViewUtils.createAnimator();
+            mAnimator.setInterpolator(AnimationUtils.LINEAR_INTERPOLATOR);
+            mAnimator.setDuration(ANIMATION_DURATION);
+            mAnimator.setUpdateListener(new ValueAnimatorCompat.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimatorCompat animator) {
+                    mCollapsingTextHelper.setExpansionFraction(animator.getAnimatedFloatValue());
+                }
+            });
+        }
+        mAnimator.setFloatValues(mCollapsingTextHelper.getExpansionFraction(), target);
+        mAnimator.start();
+    }
+</code>
+通过以上代码发现控制代码浮动变化的是mCollapsingTextHelper.setExpansionFraction(target)
+<code>
+void setExpansionFraction(float fraction) {                                                                                                     
+        fraction = MathUtils.constrain(fraction, 0f, 1f);                                                                                           
+                                                                                                                                                    
+        if (fraction != mExpandedFraction) {                                                                                                        
+            mExpandedFraction = fraction;                                                                                                           
+            calculateCurrentOffsets();                                                                                                              
+        }                                                                                                                                           
+    } 
+
+private void calculateCurrentOffsets() {
+        final float fraction = mExpandedFraction;
+
+        interpolateBounds(fraction);
+        mCurrentDrawX = lerp(mExpandedDrawX, mCollapsedDrawX, fraction,
+                mPositionInterpolator);
+        mCurrentDrawY = lerp(mExpandedDrawY, mCollapsedDrawY, fraction,
+                mPositionInterpolator);
+
+        setInterpolatedTextSize(lerp(mExpandedTextSize, mCollapsedTextSize,
+                fraction, mTextSizeInterpolator));
+
+        if (mCollapsedTextColor != mExpandedTextColor) {
+            // If the collapsed and expanded text colors are different, blend them based on the
+            // fraction
+            mTextPaint.setColor(blendColors(mExpandedTextColor, mCollapsedTextColor, fraction));
+        } else {
+            mTextPaint.setColor(mCollapsedTextColor);
+        }
+
+        ViewCompat.postInvalidateOnAnimation(mView);
+    }
+
+   @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        mCollapsingTextHelper.draw(canvas);
+    }
+
+public void draw(Canvas canvas) {
+	......
+                    // Update the TextPaint to the current text size
+            mTextPaint.setTextSize(mCurrentTextSize);
+
+	.......
+            if (mScale != 1f) {
+                canvas.scale(mScale, mScale, x, y);
+            }
+
+            if (drawTexture) {
+                // If we should use a texture, draw it instead of text
+                canvas.drawBitmap(mExpandedTitleTexture, x, y, mTexturePaint);
+            } else {
+                canvas.drawText(mTextToDraw, 0, mTextToDraw.length(), x, y, mTextPaint);
+            }
+        }
+
+        canvas.restoreToCount(saveCount);
+    }
+</code>
+</pre>
