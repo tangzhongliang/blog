@@ -1,0 +1,101 @@
+---
+layout: post
+title: Android下载管理器DownloadManager
+---
+<pre>
+    DownloadManager是系统开放给第三方应用使用的类，包含两个静态内部类DownloadManager.Query和DownloadManager.Request。DownloadManager.Request用来请求一个下载，DownloadManager.Query用来查询下载信息
+主要过程:用户创建请求，调用enqueue,DownloadManager将请求(下载状态，如url、current_byte,total_bytes等，详情见Downloads)存入Downloads数据库中,返回的id是唯一标识符，用于进行下载相关的操作 如：remove,query,restart
+    DownloadManager主要提供了下面几个接口：
+public long enqueue(Request request)执行下载，返回downloadId，downloadId可用于后面查询下载信息。若网络不满足条件、Sdcard挂载中、超过最大并发数等异常会等待下载，正常则直接下载 。
+public int remove(long… ids)删除下载，若下载中取消下载。会同时删除下载文件和记录。
+public Cursor query(Query query)查询下载信息
+request.allowScanningByMediaScanner();表示允许MediaScanner扫描到这个文件，默认不允许。
+request.setTitle(“MeiLiShuo”);设置下载中通知栏提示的标题
+request.setDescription(“MeiLiShuo desc”);设置下载中通知栏提示的介绍
+request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+表示下载进行中和下载完成的通知栏是否显示。默认只显示下载中通知。VISIBILITY_VISIBLE_NOTIFY_COMPLETED表示下载完成后显示通知栏提示。VISIBILITY_HIDDEN表示不显示任何通知栏提示，这个需要在AndroidMainfest中添加权限android.permission.DOWNLOAD_WITHOUT_NOTIFICATION.
+ 
+request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI);
+表示下载允许的网络类型，默认在任何网络下都允许下载。有NETWORK_MOBILE、NETWORK_WIFI、NETWORK_BLUETOOTH三种及其组合可供选择。如果只允许wifi下载，而当前网络为3g，则下载会等待。
+request.setAllowedOverRoaming(boolean allow)移动网络情况下是否允许漫游。
+ 
+request.setMimeType(“application/cn.trinea.download.file”);
+
+监听下载内容：
+由于DownloadManger将下载请求和状态收入数据库中可以通过监听ContentResolver来监听下载情况
+<code> getContentResolver().registerContentObserver(Uri.parse("content://downloads/"),true,new DownloadObserver(handler,MyActivity.this,downloadid));
+class DownloadChangeObserver extends ContentObserver {  
+  
+        public DownloadChangeObserver(Handler handler) {  
+            super(handler);  
+            // TODO Auto-generated constructor stub  
+        }  
+  
+  
+        @Override  
+        public void onChange(boolean selfChange) {  
+              queryDownloadStatus();     
+        }  
+  
+  
+    }  
+     private BroadcastReceiver receiver = new BroadcastReceiver() {     
+            @Override     
+            public void onReceive(Context context, Intent intent) {     
+                //这里可以取得下载的id，这样就可以知道哪个文件下载完成了。适用与多个下载任务的监听    
+                Log.v("tag", ""+intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0));    
+                queryDownloadStatus();     
+            }     
+        };     
+          
+        private void queryDownloadStatus() {     
+            DownloadManager.Query query = new DownloadManager.Query();     
+            query.setFilterById(lastDownloadId);     
+            Cursor c = dowanloadmanager.query(query);     
+            if(c!=null&&c.moveToFirst()) {     
+                int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));     
+                  
+                int reasonIdx = c.getColumnIndex(DownloadManager.COLUMN_REASON);    
+                int titleIdx = c.getColumnIndex(DownloadManager.COLUMN_TITLE);    
+                int fileSizeIdx =     
+                  c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);        
+                int bytesDLIdx =     
+                  c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);    
+                String title = c.getString(titleIdx);    
+                int fileSize = c.getInt(fileSizeIdx);    
+                int bytesDL = c.getInt(bytesDLIdx);    
+                  
+                // Translate the pause reason to friendly text.    
+                int reason = c.getInt(reasonIdx);    
+                StringBuilder sb = new StringBuilder();    
+                sb.append(title).append("\n");   
+                sb.append("Downloaded ").append(bytesDL).append(" / " ).append(fileSize);    
+                  
+                // Display the status     
+                Log.d("tag", sb.toString());    
+                switch(status) {     
+                case DownloadManager.STATUS_PAUSED:     
+                    Log.v("tag", "STATUS_PAUSED");    
+                case DownloadManager.STATUS_PENDING:     
+                    Log.v("tag", "STATUS_PENDING");    
+                case DownloadManager.STATUS_RUNNING:     
+                    //正在下载，不做任何事情    
+                    Log.v("tag", "STATUS_RUNNING");    
+             
+                 
+                    break;     
+                case DownloadManager.STATUS_SUCCESSFUL:     
+                    //完成    
+                    Log.v("tag", "下载完成");    
+//                  dowanloadmanager.remove(lastDownloadId);     
+                    break;     
+                case DownloadManager.STATUS_FAILED:     
+                    //清除已下载的内容，重新下载    
+                    Log.v("tag", "STATUS_FAILED");    
+                    dowanloadmanager.remove(lastDownloadId);     
+                    break;     
+                }     
+            }    
+        }    
+</code>
+</pre>
