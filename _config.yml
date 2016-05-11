@@ -1,5 +1,5 @@
 markdown: rdiscount
 baseurl: /blog
-pygments: true
+rouge: true
 safe: true
 auto: true
