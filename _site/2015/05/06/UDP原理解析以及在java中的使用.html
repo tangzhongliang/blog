@@ -25,7 +25,6 @@ var WRInitTime=(new Date()).getTime();
 
 <div class="site">
   <div class="title">
-	  <a href="/blog">唐中良<a/>
 	  <a class="extra" href="/blog">首页</a>
   </div>
   
@@ -89,7 +88,41 @@ UDP的Java支持
 	boolean receivedResponse = false;     //是否接收到数据的标志位
 	//直到接收到数据，或者重发次数达到预定值，则退出循环
 
-	</code>
+	while(!receivedResponse && MAXNUM>tries){
+            //发送数据
+            ds.send(dp_send);
+            try{
+                //接收从服务端发送回来的数据
+                ds.receive(dp_receive);
+                //如果接收到的数据不是来自目标地址，则抛出异常
+                if(!dp_receive.getAddress().equals(loc)){
+                    throw new IOException("Received packet from an umknown source");
+                }
+                //如果接收到数据。则将receivedResponse标志位改为true，从而退出循环
+                receivedResponse = true;
+            }catch(InterruptedIOException e){
+                //如果接收数据时阻塞超时，重发并减少一次重发的次数
+                tries += 1;
+                System.out.println("Time out," + (MAXNUM - tries) + " more tries..." );
+            }
+        }
+        if(receivedResponse){
+            //如果收到数据，则打印出来
+            System.out.println("client received data from server：");
+            String str_receive = new String(dp_receive.getData(),0,dp_receive.getLength()) +
+                    " from " + dp_receive.getAddress().getHostAddress() + ":" + dp_receive.getPort();
+            System.out.println(str_receive);
+            //由于dp_receive在接收了数据之后，其内部消息长度值会变为实际接收的消息的字节数，
+            //所以这里要将dp_receive的内部消息长度重新置为1024
+            dp_receive.setLength(1024);
+        }else{
+            //如果重发MAXNUM次数据后，仍未获得服务器发送回来的数据，则打印如下信息
+            System.out.println("No response -- give up.");
+        }
+        ds.close();
+    }
+}
+</code>
 </pre>
 <pre>
 <code>
@@ -172,11 +205,11 @@ dp_receive.getOffset() + dp_receive.getLength());
   <h2>Related Posts</h2>
   <ul class="posts">
     
+      <li><span>06 May 2016</span> &raquo; <a href="/2016/05/06/%E5%9F%BA%E4%BA%8ESocket%E7%9A%84%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF.html">基于Socket的网络通讯</a></li>
+    
+      <li><span>06 May 2016</span> &raquo; <a href="/2016/05/06/TextInputLayout%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90.html">TextInputLayout源码解析</a></li>
+    
       <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/%E7%BD%91%E7%BB%9C%E5%8A%A0%E5%AF%86%E5%AE%89%E5%85%A8.html">网络传输加密安全</a></li>
-    
-      <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/ubuntu%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E6%90%AD%E9%85%8Djekyll%E7%8E%AF%E5%A2%83.html">ubuntu如何正确搭配jekyll环境</a></li>
-    
-      <li><span>04 Apr 2015</span> &raquo; <a href="/2015/04/04/hello-world.html">你好，世界</a></li>
     
   </ul>
 </div>

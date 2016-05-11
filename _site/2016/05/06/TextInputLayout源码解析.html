@@ -1,7 +1,35 @@
----
-layout: post
-title: TextInputLayout源码解析
----
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>TextInputLayout源码解析</title>
+   <meta name="author" content="唐中良" />
+   <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/blog/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/blog/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+<!-- ClickTale Top part -->
+<script type="text/javascript">
+var WRInitTime=(new Date()).getTime();
+</script>
+<!-- ClickTale end of Top part -->
+
+<div class="site">
+  <div class="title">
+	  <a class="extra" href="/blog">首页</a>
+  </div>
+  
+  <div id="post">
+<h2 class="title">TextInputLayout源码解析 </h2>
 <pre>
 TextInputLayout的基本原理是:取消EditText的hint， 监听EditText的创建和输入内容的变化，更新Label的状态(x，y轴位置，颜色，缩小比例) ,然后通知TextInputLayout重新绘制
 CollapsingTextHelper类主要用来存储Label的状态，绘制Label,计算位置。
@@ -190,3 +218,57 @@ public void draw(Canvas canvas) {
     }
 </code>
 </pre>
+
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>06 May 2016</span> &raquo; <a href="/2016/05/06/%E5%9F%BA%E4%BA%8ESocket%E7%9A%84%E7%BD%91%E7%BB%9C%E9%80%9A%E8%AE%AF.html">基于Socket的网络通讯</a></li>
+    
+      <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/%E7%BD%91%E7%BB%9C%E5%8A%A0%E5%AF%86%E5%AE%89%E5%85%A8.html">网络传输加密安全</a></li>
+    
+      <li><span>06 May 2015</span> &raquo; <a href="/2015/05/06/ubuntu%E5%A6%82%E4%BD%95%E6%AD%A3%E7%A1%AE%E6%90%AD%E9%85%8Djekyll%E7%8E%AF%E5%A2%83.html">ubuntu如何正确搭配jekyll环境</a></li>
+    
+  </ul>
+</div>
+
+  <div class="contact">
+      
+  <!--</div>
+    <div class="rss">
+      <a href="/">
+	      <img src="/blog/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+    -->
+  </div>
+</div>
+
+<a href="http://github.com/tangzhongliang"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+<!-- ClickTale Bottom part -->
+<div id="ClickTaleDiv" style="display: none;"></div>
+<script type="text/javascript">
+if(document.location.protocol!='https:')
+  document.write(unescape("%3Cscript%20src='http://s.clicktale.net/WRb.js'%20type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+if(typeof ClickTale=='function') ClickTale(206,0.3,"www03");
+</script>
+<!-- ClickTale end of Bottom part -->
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6016902-1");
+pageTracker._trackPageview();
+</script>
+<!-- Google Analytics end -->
+
+</body>
+</html>

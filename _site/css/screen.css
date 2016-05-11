@@ -13,19 +13,21 @@
 
 html, body {
   height: 100%;
+  background-color:#d4bfbf;
 }
 
 body {
-  background-color: #f5f5d5;
   font: 13.34px helvetica, arial, clean, sans-serif;
   *font-size: small;
   text-align: center;
-  margin-left: 50px;
-  margin-right: 50px;
+  padding: 0 .4em;
+  text-align:center;
+  margin-left:auto; 
+  margin-right:auto;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-size: 100%;
+  font-size: 120%;
 }
 
 h1 {
@@ -71,7 +73,8 @@ ul.posts {
 
   ul.posts span {
     color: #aaa;
-    font-family: Monaco, "Courier New", monospace;
+    width: 70%;
+    font-family: "Microsoft YaHei";
     font-size: 80%;
   }
 
@@ -96,7 +99,7 @@ ul.posts {
 }
 
   .site .title a {
-    color: #a00;
+    color: #000;
     text-decoration: none;
   }
 
@@ -154,17 +157,25 @@ ul.posts {
 /*****************************************************************************/
 
 #post {
-
+  background-color: #fff;
+  padding: 1.5em 1.5em;
+  margin-top: 2em;
+  -moz-border-radius: 5px;      /* Gecko browsers */
+  -webkit-border-radius: 5px;   /* Webkit browsers */
+  border-radius:5px;            /* W3C syntax */
+  box-shadow: 0 0 5px #666;
+  overflow: hidden;
 }
 
   /* standard */
 
   #post pre {
-    border: 1px solid #ddd;
-    background-color: #eef;
+    /*border: 1px solid #ddd;*/
     padding: 0 .4em;
     white-space: pre-wrap;
-    word-wrap: break-word;
+    word-break: break-all;
+    word-wrap22: break-word;
+    margin-top: 2em;
   }
 
   #post ul,
@@ -173,14 +184,20 @@ ul.posts {
   }
 
   #post code {
-    border: 1px solid #ddd;
-    background-color: #eef;
-    font-size: 85%;
-    padding: 0 .2em;
+    /*border: 1px solid #ddd;*/
+    background-color: #d4bfbf;
+    font-size: 100%;
+    padding: .5em;
+    margin: .2em;
   }
 
     #post pre code {
     border: none;
+    background-color: #d4bfbf;
+    font-size: 100%;
+    /*border: 1px solid #ddd;*/
+    margin-top: 2em;
+    display: inherit;
     }
 
   /* terminal */

@@ -25,8 +25,8 @@ var WRInitTime=(new Date()).getTime();
 
 <div class="site">
   <div class="title">
-	  <!--<a href="{{site.baseurl}}">唐中良</>-->
-		  <a class="extra" href="{{site.baseurl}}">home</a>
+	  <a href="{{site.baseurl}}">唐中良<a/>
+	  <a class="extra" href="{{site.baseurl}}">首页</a>
   </div>
   
   {{ content }}
