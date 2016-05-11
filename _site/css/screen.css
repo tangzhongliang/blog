@@ -13,7 +13,7 @@
 
 html, body {
   height: 100%;
-  background-color:#d4bfbf;
+  background-color:#e6e6e6;
 }
 
 body {
@@ -185,7 +185,7 @@ ul.posts {
 
   #post code {
     /*border: 1px solid #ddd;*/
-    background-color: #d4bfbf;
+    background-color: #e6e6e6;
     font-size: 100%;
     padding: .5em;
     margin: .2em;
@@ -193,7 +193,7 @@ ul.posts {
 
     #post pre code {
     border: none;
-    background-color: #d4bfbf;
+    background-color: #e6e6e6;
     font-size: 100%;
     /*border: 1px solid #ddd;*/
     margin-top: 2em;
