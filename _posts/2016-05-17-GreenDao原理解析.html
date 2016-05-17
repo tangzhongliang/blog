@@ -1,0 +1,94 @@
+---
+layout: post
+title: GreenDao原理解析
+---
+<p>
+GreenDAO工作原理
+
+我们首先来看看使用GreenDAO的基本步骤：
+
+//生成数据库文件，名为students-db
+DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "students-db", null);
+SQLiteDatabase db = helper.getWritableDatabase();
+//建立特定模式下的所有的DAO对象和数据库db对象的映射
+DaoMaster master = new DaoMaster(db);
+//管理特定模式下的所有DAO对象，并提供一些通用的CRUD持久化方法
+DaoSession session = master.newSession();
+//得到指定的StudentDao对象
+StudentDao dao = session.getStudentDao();
+dao.insert(student);
+//...
+
+DevOpenHelper是SQLiteOpenHelper的子类
+DaoSession是Dao的工厂类
+Dao,entity是通过freemarker动态生成代码
+<code>
+	/** WARNING: Drops all table on Upgrade! Use only during development. */
+	public static class DevOpenHelper extends OpenHelper {
+	public DevOpenHelper(Context context, String name, CursorFactory factory) c class DaoMaster extends AbstractDaoMaster {
+	public static final int SCHEMA_VERSION = 1;
+
+	/** Creates underlying database table using DAOs. */
+	public static void createAllTables(SQLiteDatabase db, boolean ifNotExists) {
+	StudentDao.createTable(db, ifNotExists);
+	}
+
+	/** Drops underlying database table using DAOs. */
+	public static void dropAllTables(SQLiteDatabase db, boolean ifExists) {
+	StudentDao.dropTable(db, ifExists);
+	}
+
+	public static abstract class OpenHelper extends SQLiteOpenHelper {
+
+	public OpenHelper(Context context, String name, CursorFactory factory) {
+	super(context, name, factory, SCHEMA_VERSION);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+	Log.i("greenDAO", "Creating tables for schema version " + SCHEMA_VERSION);
+	createAllTables(db, false);
+	}
+	}
+
+	/** WARNING: Drops all table on Upgrade! Use only during development. */
+	public static class DevOpenHelper extends OpenHelper {
+	public DevOpenHelper(Context context, String name, CursorFactory factory) {
+	super(context, name, factory);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	Log.i("greenDAO", "Upgrading schema from version " + oldVersion + " to " + newVersion + " by dropping all tables");
+	dropAllTables(db, true);
+	onCreate(db);
+	}
+	}
+
+	public DaoMaster(SQLiteDatabase db) {
+	super(db, SCHEMA_VERSION);
+	registerDaoClass(StudentDao.class);
+	}
+
+	public DaoSession newSession() {
+	return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);
+	}
+
+	public DaoSession newSession(IdentityScopeType type) {
+	return new DaoSession(db, type, daoConfigMap);
+	}
+
+	}
+	{
+	super(context, name, factory);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	Log.i("greenDAO", "Upgrading schema from version " + oldVersion + " to " + newVersion + " by dropping all tables");
+	dropAllTables(db, true);
+	onCreate(db);
+	}
+	}
+</code>
+</p>
