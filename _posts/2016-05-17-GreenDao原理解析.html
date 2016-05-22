@@ -2,10 +2,8 @@
 layout: post
 title: GreenDao原理解析
 ---
-<p>
-GreenDAO工作原理
-
-我们首先来看看使用GreenDAO的基本步骤：
+<pre>
+GreenDAO工作原理 我们首先来看看使用GreenDAO的基本步骤：
 
 //生成数据库文件，名为students-db
 DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "students-db", null);
@@ -91,4 +89,5 @@ Dao,entity是通过freemarker动态生成代码
 	}
 	}
 </code>
-</p>
+
+</pre>

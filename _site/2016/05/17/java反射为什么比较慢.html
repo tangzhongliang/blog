@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>网络传输加密安全</title>
+   <title>java反射为什么比较慢</title>
    <meta name="author" content="唐中良" />
    <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
    <!-- syntax highlighting CSS -->
@@ -29,31 +29,19 @@ var WRInitTime=(new Date()).getTime();
   </div>
   
   <div id="post">
-<h2 class="title">网络传输加密安全 </h2>
-<br/>	开放系统互联模型（OSI参考，open system interconnection）
-<br/>	应用层 ………………。计算机：应用程序，如FTP，SMTP，HTTP
-<br/>
-<br/>	表示层 ………………。计算机：编码方式，图像编解码、URL字段传输编码
-<br/>
-<br/>	会话层 ………………。计算机：建立会话，SESSION认证、断点续传
-<br/>
-<br/>	传输层 ………………。计算机：进程和端口
-<br/>
-<br/>	网络层…………………网络：路由器，防火墙、多层交换机
-<br/>
-<br/>	数据链路层 ……………网络：网卡，网桥，交换机
-<br/>
-<br/>	物理层…………………网络：中继器，集线器、网线、HUB
-<br/>
-<br/>	https是基于ssl的加密传输
-<br/>	首先发送者对自己要发送的数据进行单行加密，计算出数据的特征码，并且使用自己的私钥讲该段特征码进行加密，并且将其特征码附加至数据的尾部，之后在使用对称加密，随机生成一个加密密码，使用该密码对包含有特征码和数据这一整块进行加密，之后在使用接受者的公钥对随机生成的这个密码进行加密，附加至所有数据之后发送给接受者！
-<br/>
-<br/>	http是明文传输
-<br/>	POST和GET的差别其实是很大的。语义上，GET是获取指定URL上的资源，是读操作，重要的一点是不论对某个资源GET多少次，它的状态是不会改变的，在这个意义上，我们说GET是安全的（不是被密码学或者数据保护意义上的安全）。因为GET是安全的，所以GET返回的内容可以被浏览器，Cache服务器缓存起来（其中还有很多细节，但不影响这里的讨论）
-<br/>
-<br/>	TCP socket如何使用ssl加密
-<br/>	java封装了SSLSocket，开发者可以直接调用
-	<a href="http://my.oschina.net/itblog/blog/651608">java使用SSLSocket通信</a>
+<h2 class="title">java反射为什么比较慢 </h2>
+<p>
+反射在运行时做了更多的操作
+<ul>
+	<li>检查是否有一个参数的构造函数</li>
+	<li>检查参数的构造函数的可访问性</li>
+	<li>计算出要分配多大的空间</li>
+</ul>
+反射在运行时不能做的操作
+<ul>
+	<li>JVM不能对运行时的代码进行优化</li>
+</ul>
+</p>
 
 </div>
 
@@ -63,9 +51,9 @@ var WRInitTime=(new Date()).getTime();
     
       <li><span>22 May 2016</span> &raquo; <a href="/2016/05/22/%E5%BE%88%E5%A5%BD%E7%9A%84%E4%BB%8B%E7%BB%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BD%91%E7%AB%99.html">很好的介绍设计模式的网站</a></li>
     
-      <li><span>17 May 2016</span> &raquo; <a href="/2016/05/17/java%E5%8F%8D%E5%B0%84%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%94%E8%BE%83%E6%85%A2.html">java反射为什么比较慢</a></li>
-    
       <li><span>17 May 2016</span> &raquo; <a href="/2016/05/17/GreenDao%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90.html">GreenDao原理解析</a></li>
+    
+      <li><span>11 May 2016</span> &raquo; <a href="/2016/05/11/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90Volley%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86.html">深入解析Volley的实现原理</a></li>
     
   </ul>
 </div>

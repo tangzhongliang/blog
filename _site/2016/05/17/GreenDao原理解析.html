@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>GreenDao原理解析</title>
+   <meta name="author" content="唐中良" />
+   <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/blog/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/blog/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+<!-- ClickTale Top part -->
+<script type="text/javascript">
+var WRInitTime=(new Date()).getTime();
+</script>
+<!-- ClickTale end of Top part -->
+
+<div class="site">
+  <div class="title">
+	  <a class="extra" href="/blog">首页</a>
+  </div>
+  
+  <div id="post">
+<h2 class="title">GreenDao原理解析 </h2>
+<pre>
+GreenDAO工作原理 我们首先来看看使用GreenDAO的基本步骤：
+
+//生成数据库文件，名为students-db
+DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(this, "students-db", null);
+SQLiteDatabase db = helper.getWritableDatabase();
+//建立特定模式下的所有的DAO对象和数据库db对象的映射
+DaoMaster master = new DaoMaster(db);
+//管理特定模式下的所有DAO对象，并提供一些通用的CRUD持久化方法
+DaoSession session = master.newSession();
+//得到指定的StudentDao对象
+StudentDao dao = session.getStudentDao();
+dao.insert(student);
+//...
+
+DevOpenHelper是SQLiteOpenHelper的子类
+DaoSession是Dao的工厂类
+Dao,entity是通过freemarker动态生成代码
+<code>
+	/** WARNING: Drops all table on Upgrade! Use only during development. */
+	public static class DevOpenHelper extends OpenHelper {
+	public DevOpenHelper(Context context, String name, CursorFactory factory) c class DaoMaster extends AbstractDaoMaster {
+	public static final int SCHEMA_VERSION = 1;
+
+	/** Creates underlying database table using DAOs. */
+	public static void createAllTables(SQLiteDatabase db, boolean ifNotExists) {
+	StudentDao.createTable(db, ifNotExists);
+	}
+
+	/** Drops underlying database table using DAOs. */
+	public static void dropAllTables(SQLiteDatabase db, boolean ifExists) {
+	StudentDao.dropTable(db, ifExists);
+	}
+
+	public static abstract class OpenHelper extends SQLiteOpenHelper {
+
+	public OpenHelper(Context context, String name, CursorFactory factory) {
+	super(context, name, factory, SCHEMA_VERSION);
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+	Log.i("greenDAO", "Creating tables for schema version " + SCHEMA_VERSION);
+	createAllTables(db, false);
+	}
+	}
+
+	/** WARNING: Drops all table on Upgrade! Use only during development. */
+	public static class DevOpenHelper extends OpenHelper {
+	public DevOpenHelper(Context context, String name, CursorFactory factory) {
+	super(context, name, factory);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	Log.i("greenDAO", "Upgrading schema from version " + oldVersion + " to " + newVersion + " by dropping all tables");
+	dropAllTables(db, true);
+	onCreate(db);
+	}
+	}
+
+	public DaoMaster(SQLiteDatabase db) {
+	super(db, SCHEMA_VERSION);
+	registerDaoClass(StudentDao.class);
+	}
+
+	public DaoSession newSession() {
+	return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);
+	}
+
+	public DaoSession newSession(IdentityScopeType type) {
+	return new DaoSession(db, type, daoConfigMap);
+	}
+
+	}
+	{
+	super(context, name, factory);
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	Log.i("greenDAO", "Upgrading schema from version " + oldVersion + " to " + newVersion + " by dropping all tables");
+	dropAllTables(db, true);
+	onCreate(db);
+	}
+	}
+</code>
+
+</pre>
+
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>22 May 2016</span> &raquo; <a href="/2016/05/22/%E5%BE%88%E5%A5%BD%E7%9A%84%E4%BB%8B%E7%BB%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BD%91%E7%AB%99.html">很好的介绍设计模式的网站</a></li>
+    
+      <li><span>17 May 2016</span> &raquo; <a href="/2016/05/17/java%E5%8F%8D%E5%B0%84%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%94%E8%BE%83%E6%85%A2.html">java反射为什么比较慢</a></li>
+    
+      <li><span>11 May 2016</span> &raquo; <a href="/2016/05/11/%E6%B7%B1%E5%85%A5%E8%A7%A3%E6%9E%90Volley%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86.html">深入解析Volley的实现原理</a></li>
+    
+  </ul>
+</div>
+
+  <div class="contact">
+      
+  <!--</div>
+    <div class="rss">
+      <a href="/">
+	      <img src="/blog/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+    -->
+  </div>
+</div>
+
+<a href="#"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+<!-- ClickTale Bottom part -->
+<div id="ClickTaleDiv" style="display: none;"></div>
+<script type="text/javascript">
+if(document.location.protocol!='https:')
+  document.write(unescape("%3Cscript%20src='http://s.clicktale.net/WRb.js'%20type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+if(typeof ClickTale=='function') ClickTale(206,0.3,"www03");
+</script>
+<!-- ClickTale end of Bottom part -->
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6016902-1");
+pageTracker._trackPageview();
+</script>
+<!-- Google Analytics end -->
+
+</body>
+</html>
