@@ -8,7 +8,7 @@ echo "---" >> "${filename}"
 echo "layout: post" >> "${filename}"
 echo "title: ${name}" >> "${filename}"
 echo "---" >> "${filename}"
-echo "<p>" >> "${filename}"
-echo "</p>" >> "${filename}"
+echo "<pre>" >> "${filename}"
+echo "</pre>" >> "${filename}"
 vim $filename
 cd ..

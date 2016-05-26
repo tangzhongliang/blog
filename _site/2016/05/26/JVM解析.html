@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>ubuntu如何正确搭配jekyll环境</title>
+   <title>JVM解析</title>
    <meta name="author" content="唐中良" />
    <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
    <!-- syntax highlighting CSS -->
@@ -29,16 +29,36 @@ var WRInitTime=(new Date()).getTime();
   </div>
   
   <div id="post">
-<h2 class="title">ubuntu如何正确搭配jekyll环境 </h2>
+<h2 class="title">JVM解析 </h2>
 <pre>
-sudo apt-get install ruby ruby-dev make gcc nodejs
-将gem的源库由Https改为http
-gem sources --remove https://rubygems.org/
-gem sources -a http://ruby.taobao.org/
-sudo gem install jekyll
-进入项目根目录执行命令
-jekyll serve
-在浏览器中访问http://localhost:4000/project/ project改为你的项目名称
+Java虚拟机（JVM）是运行的Java程序的一种抽象的计算机。有三个概念的JVM：规范，实现和实例。该规范是正式地描述了需要JVM实现的文档。有一个单一的规范，确保所有实现的互操作性。一个JVM实现是符合JVM规范要求的计算机程序。 JVM程序执行编译成Java字节码。
+Java运行环境（JRE）包含了运行Java程序所需要的软件包。它包括一个JVM实现和在Java类库。 Oracle公司JVM实现是HotSpot Java虚拟机。
+<img src="/blog/images/jvm.png}"/>
+JVM specification:
+规范省略了实现细节，以确保互操作：运行时数据区的存储器布局，所用的垃圾收集算法，和在Java虚拟机指令的任何内部优化（将其翻译成机器代码）。实现者可以自由实现。任何Java应用程序可以在JVM的任何具体实现中运行。
+<ul>
+Class loader:
+类加载器执行本严格的顺序三种基本的活动：
+	<li>Loading：发现并导入二进制数据的类型</li>
+	<li>Linking：执行verification，preparation和resolution</li>
+	<ul>
+		<li>验证(verification)：确保导入类型的正确性 </li>
+		<li>准备(preparation)：对分配类变量内存和初始化的内存为默认值</li> 
+		<li>解析(resolution)：从转换的类型分为直接引用符号引用。</li>
+	</ul>
+	<li>初始化：将调用初始化类变量到正确的初始值的Java代码。</li>
+
+</ul>
+jvm languages:
+jvm语言是与可以在可以由java虚拟机被托管的有效类文件表示的功能性的语言。类文件包含java虚拟机指令（java字节代码）和符号表，以及其它辅助信息。类和接口经过jvm语言编译生成的二进制文件是硬件和操作系统无关的。
+<ul>
+Bytecode verifier:
+在执行字节码之前,JVM会验证所有字节码。这种验证主要包括三种类型的检查：
+<li>分行始终是有效的位置</li> 
+<li>数据总是初始化和引用总是类型安全</li>
+<li>访问私人或私有封装数据和方法被严格控制</li>
+</ul>
+具体信息请参考<a href="https://en.wikipedia.org/wiki/Java_virtual_machine">https://en.wikipedia.org/wiki/Java_virtual_machin://en.wikipedia.org/wiki/Java_virtual_machine</a>
 </pre>
 
 </div>
@@ -47,11 +67,11 @@ jekyll serve
   <h2>Related Posts</h2>
   <ul class="posts">
     
-      <li><span>26 May 2016</span> &raquo; <a href="/2016/05/26/JVM%E8%A7%A3%E6%9E%90.html">JVM解析</a></li>
-    
       <li><span>25 May 2016</span> &raquo; <a href="/2016/05/25/android%E4%B8%AD%E5%B0%86uri%E8%BD%AC%E5%8C%96%E6%88%90file.html">android中将uri转化成file</a></li>
     
       <li><span>22 May 2016</span> &raquo; <a href="/2016/05/22/%E5%BE%88%E5%A5%BD%E7%9A%84%E4%BB%8B%E7%BB%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E7%BD%91%E7%AB%99.html">很好的介绍设计模式的网站</a></li>
+    
+      <li><span>17 May 2016</span> &raquo; <a href="/2016/05/17/java%E5%8F%8D%E5%B0%84%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%94%E8%BE%83%E6%85%A2.html">java反射为什么比较慢</a></li>
     
   </ul>
 </div>
