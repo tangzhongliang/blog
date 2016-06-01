@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>opencv 轮廓检测</title>
+   <meta name="author" content="唐中良" />
+   <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/blog/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/blog/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+<!-- ClickTale Top part -->
+<script type="text/javascript">
+var WRInitTime=(new Date()).getTime();
+</script>
+<!-- ClickTale end of Top part -->
+
+<div class="site">
+  <div class="title">
+	  <a class="extra" href="/blog">首页</a>
+  </div>
+  
+  <div id="post">
+<h2 class="title">opencv 轮廓检测 </h2>
+<pre>
+在 OpenCV 中，通过一个数组表达轮廓的层级关系：
+
+[Next, Previous, First_Child, Parent]
+
+Next：同一层级的下一个轮廓。在上图中， 0 的 Next 就是 1 ，1 的 Next 就是 2 ，2 的 Next 是 -1 ，表示没有下一个同级轮廓。
+Previous：同一层级的上一个轮廓。比如 5 的 Previous 是 4， 1 的 Previous 就是 0 ，0 的 Previous 是 -1 。
+First_Child：第一个子轮廓，比如 2 的 First_Child 就是 2a ，像 3a 这种有两个 Child ，只取第一个，比如选择 4 作为 First_Child 。
+Parent：父轮廓，比如 4 和 5 的 Parent 都是 3a ，3a 的 Parent 是 3 。
+关于轮廓层级的问题，参考阅读：《Tutorial: Contours Hierarchy》
+
+findContours
+
+了解了 contour 相关的基础概念之后，接下来就是在 OpenCV 里的具体代码了。
+
+findContours 是寻找轮廓的函数，函数定义如下：
+
+cv2.findContours(image, mode, method) → image, contours, hierarchy
+
+其中：
+
+image：资源图片，8 bit 单通道，一般需要将普通的 BGR 图片通过 cvtColor 函数转换。
+mode：边缘检测的模式，包括：
+CV_RETR_EXTERNAL：只检索最大的外部轮廓（extreme outer），没有层级关系，只取根节点的轮廓。
+CV_RETR_LIST：检索所有轮廓，但是没有 Parent 和 Child 的层级关系，所有轮廓都是同级的。
+CV_RETR_CCOMP：检索所有轮廓，并且按照二级结构组织：外轮廓和内轮廓。以前面的大图为例，0、1、2、3、4、5 都属于第0层，2a 和 3a 都属于第1层。
+CV_RETR_TREE：检索所有轮廓，并且按照嵌套关系组织层级。以前面的大图为例，0、1、2 属于第0层，2a 属于第1层，3 属于第2层，3a 属于第3层，4、5 属于第4层。
+method：边缘近似的方法，包括：
+CV_CHAIN_APPROX_NONE：严格存储所有边缘点，即：序列中任意两个点的距离均为1。
+CV_CHAIN_APPROX_SIMPLE：压缩边缘，通过顶点绘制轮廓。
+
+drawContours
+
+drawContours 是绘制边缘的函数，可以传入 findContours 函数返回的轮廓结果，在目标图像上绘制轮廓。函数定义如下：
+
+Python: cv2.drawContours(image, contours, contourIdx, color) → image
+
+其中：
+
+image：目标图像，直接修改目标的像素点，实现绘制。
+contours：需要绘制的边缘数组。
+contourIdx：需要绘制的边缘索引，如果全部绘制则为 -1。
+color：绘制的颜色，为 BGR 格式的 Scalar 。
+thickness：可选，绘制的密度，即描绘轮廓时所用的画笔粗细。
+lineType: 可选，连线类型，分为以下几种：
+LINE_4：4-connected line，只有相邻的点可以连接成线，一个点有四个相邻的坑位。
+LINE_8：8-connected line，相邻的点或者斜对角相邻的点可以连接成线，一个点有四个相邻的坑位和四个斜对角相邻的坑位，所以一共有8个坑位。
+LINE_AA：antialiased line，抗锯齿连线。
+hierarchy：可选，如果需要绘制某些层级的轮廓时作为层级关系传入。
+maxLevel：可选，需要绘制的层级中的最大级别。如果为1，则只绘制最外层轮廓，如果为2，绘制最外层和第二层轮廓，以此类推。
+
+加载图像
+
+首先加载图像，并通过 matplotlib 显示图像查看效果：
+
+img = cv2.imread('1.jpg')
+show(img)
+OpenCV 中默认是 BGR 通道，通过 cvtColor 函数将原图转换成灰度图：
+
+img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+边缘检测
+
+有了灰度图之后，接下来用 Canny 边缘检测算法检测边缘。
+
+Canny 边缘检测算法主要是以下几个步骤：
+
+用高斯滤波器平滑图像去除噪声干扰（低通滤波器消除高频噪声）。
+生成每个点的亮度梯度图（intensity gradients），以及亮度梯度的方向。
+通过非极大值抑制（non-maximum suppression）缩小边缘宽度。非极大值抑制的意思是，只保留梯度方向上的极大值，删除其他非极大值，从而实现锐化的效果。
+通过双阈值法（double threshold）寻找潜在边缘。大于高阈值为强边缘（strong edge），保留；小于低阈值则删除；不大不小的为弱边缘（weak edge），待定。
+通过迟滞现象（Hysteresis）处理待定边缘。弱边缘有可能是边缘，也可能是噪音，判断标准是：如果一个弱边缘点附近的八个相邻点中，存在一个强边缘，则此弱边缘为强边缘，否则排除。
+在 OpenCV 中可以直接使用 Canny 函数，不过在那之前要先用 GaussianBlur 函数进行高斯模糊：
+
+img_gb = cv2.GaussianBlur(img_gray, (5, 5), 0)
+接下来使用 Canny 函数检测边缘，选择 100 和 200 作为高低阈值：
+
+edges = cv2.Canny(img_gray, 100 , 200)
+
+遍历图像的层级关系，然后取出嵌套层数大于等于５的轮廓
+<code>
+mg_fc, contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+hierarchy = hierarchy[0]
+found = []
+for i in range(len(contours)):
+    k = i
+    c = 0
+    while hierarchy[k][2] != -1:
+        k = hierarchy[k][2]
+        c = c + 1
+    if c >= 5:
+        found.append(i)
+
+for i in found:
+    img_dc = img.copy()
+    cv2.drawContours(img_dc, contours, i, (0, 255, 0), 3)
+    show(img_dc)
+</code>
+
+取出轮廓的区域空间
+rect = cv2.minAreaRect(contours[i])
+</pre>
+
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/%E9%80%8F%E8%A7%86%E5%8F%98%E6%8D%A2cvWrapPerspective.html">透视变换cvWrapPerspective</a></li>
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/%E5%9B%BE%E7%89%87%E8%A3%81%E5%89%AA%E6%88%90%E4%BB%BB%E6%84%8F%E5%BD%A2%E7%8A%B6.html">图片裁剪成任意形状</a></li>
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/Installing-Opencv3.1.0-on-ubuntu.html">Installing Opencv3.1.0 on ubuntu</a></li>
+    
+  </ul>
+</div>
+
+  <div class="contact">
+      
+  <!--</div>
+    <div class="rss">
+      <a href="/">
+	      <img src="/blog/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+    -->
+  </div>
+</div>
+
+<a href="#"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+<!-- ClickTale Bottom part -->
+<div id="ClickTaleDiv" style="display: none;"></div>
+<script type="text/javascript">
+if(document.location.protocol!='https:')
+  document.write(unescape("%3Cscript%20src='http://s.clicktale.net/WRb.js'%20type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+if(typeof ClickTale=='function') ClickTale(206,0.3,"www03");
+</script>
+<!-- ClickTale end of Bottom part -->
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6016902-1");
+pageTracker._trackPageview();
+</script>
+<!-- Google Analytics end -->
+
+</body>
+</html>

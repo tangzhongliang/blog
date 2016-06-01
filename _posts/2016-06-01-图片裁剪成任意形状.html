@@ -1,0 +1,27 @@
+---
+layout: post
+title: 图片裁剪成任意形状
+---
+<pre>
+<code>
+	Mat srcImg = imread("lena.jpg");
+	Mat dstImg;
+	Mat mask = Mat::zeros(srcImg.size(),CV_8UC1);
+
+	vector<vector<Point>> contour;
+	vector<Point> pts;
+	pts.push_back(Point(30,45));
+	pts.push_back(Point(500,35));
+	pts.push_back(Point(430,240));
+	pts.push_back(Point(50,250));
+	contour.push_back(pts);
+
+	drawContours(mask,contour,0,Scalar::all(255),-1);
+	srcImg.copyTo(dstImg,mask);
+
+	imshow("src",srcImg);
+	imshow("mask",mask);
+	imshow("roi",dstImg);
+	waitKey();
+</code>
+</pre>

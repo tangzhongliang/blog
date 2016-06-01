@@ -1,0 +1,12 @@
+管理管理生成的实例以及信息的实体
+Canvas_Delegate
+Bimap_Delegate
+Matrix_Delegate
+Paint_Delegate
+
+AffineTransform mtx = matrixDelegate.getAffineTransform();
+graphics.drawImage(image, mtx, null);
+
+(x,y) set/get ARGB
+
+BufferImage

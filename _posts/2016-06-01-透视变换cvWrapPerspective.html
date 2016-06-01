@@ -1,0 +1,101 @@
+---
+layout: post
+title: 透视变换cvWrapPerspective
+---
+<pre>
+透视变换（单应性？）能提供更大的灵活性，但是一个透视投影并不是线性变换，因此所采用的映射矩阵是3*3，且控点变为4个，其他方面与仿射变换完全类似，下面的例程是针对密集变换，稀疏图像变换则采用cvPerspectiveTransform函数来处理。
+------------------------------------------------------------------------------------------------
+WarpPerspective
+对图像进行透视变换
+void cvWarpPerspective( const CvArr* src, CvArr* dst,const CvMat* map_matrix,
+                       int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                       CvScalar fillval=cvScalarAll(0) );
+src
+输入图像.
+dst
+输出图像.
+map_matrix
+3×3 变换矩阵
+flags
+插值方法和以下开关选项的组合:
+·       CV_WARP_FILL_OUTLIERS- 填充所有缩小图像的象素。如果部分象素落在输入图像的边界外，那么它们的值设定为 fillval.
+·       CV_WARP_INVERSE_MAP- 指定 matrix 是输出图像到输入图像的反变换，因此可以直接用来做象素插值。否则, 函数从 map_matrix 得到反变换。
+fillval
+用来填充边界外面的值
+函数 cvWarpPerspective 利用下面指定矩阵变换输入图像：dst(x1,y1)-src(x,y)
+如果没有指定 CV_WARP_INVERSE_MAP ， 
+否则， 
+要变换稀疏矩阵，使用 cxcore 中的函数 cvTransform 。
+-----------------------------
+GetPerspectiveTransform
+由四对点计算透射变换
+CvMat* cvGetPerspectiveTransform( const CvPoint2D32f*src, const CvPoint2D32f* dst,
+                                  CvMat*map_matrix );
+ 
+#define cvWarpPerspectiveQMatrixcvGetPerspectiveTransform
+src
+输入图像的四边形顶点坐标。
+dst
+输出图像的相应的四边形顶点坐标。
+map_matrix
+指向3×3输出矩阵的指针。
+函数cvGetPerspectiveTransform计算满足以下关系的透射变换矩阵：
+
+这里,dst(i)= (x'i,y'i),src(i)= (xi,yi),i = 0..3.
+<code>
+#include <highgui.h>
+#include <cv.h>
+
+int main(int argc, char** argv)
+{
+	CvPoint2D32f srcTri[4], dstTri[4]; //二维坐标下的点，类型为浮点
+	//CvMat* rot_mat = cvCreateMat( 2, 3, CV_32FC1 );  //多通道矩阵
+	CvMat* warp_mat = cvCreateMat( 3, 3, CV_32FC1 );
+	IplImage *src, *dst;
+
+	if( argc == 2 && ( ( src = cvLoadImage( argv[1], 1 ) ) != 0 ) )
+	{
+		dst = cvCloneImage( src );  //制作图像的完整拷贝
+		dst ->origin = src ->origin;  
+		/*
+		int origin; /* 0 - 顶—左结构,
+		1 - 底—左结构 (Windows bitmaps 风格) 
+		*/
+		cvZero( dst );  //清空数组
+
+		//计算矩阵仿射变换
+		srcTri[0].x = 0;
+		srcTri[0].y = 0;
+		srcTri[1].x = src -> width - 1;  //缩小一个像素
+		srcTri[1].y = 0;
+		srcTri[2].x = 0;
+		srcTri[2].y = src -> height - 1;
+		srcTri[3].x = src -> width - 1;  //bot right
+		srcTri[3].y = src -> height - 1;
+
+		//改变目标图像大小
+		dstTri[0].x = src -> width * 0.05;
+		dstTri[0].y = src -> height * 0.33;
+		dstTri[1].x = src -> width * 0.9;
+		dstTri[1].y = src -> height * 0.25;
+		dstTri[2].x = src -> width * 0.2;
+		dstTri[2].y = src -> height * 0.7;
+		dstTri[3].x = src -> width * 0.8;
+		dstTri[3].y = src -> height * 0.9;
+
+		cvGetPerspectiveTransform( srcTri, dstTri, warp_mat );  //由三对点计算仿射变换 
+		cvWarpPerspective( src, dst, warp_mat );  //对图像做仿射变换
+
+		//输出
+		cvNamedWindow( "Perspective Warp", 1 );
+		cvShowImage( "Perspective Warp", dst );  //最终是输出dst 
+		cvWaitKey();
+	}
+	cvReleaseImage( &dst );
+	cvReleaseMat( &warp_mat );
+
+	return 0;
+}
+</code>
+原文地址:<a href="http://blog.csdn.net/hitwengqi/article/details/6890220">http://blog.csdn.net/hitwengqi/article/details/6890220</a>
+</pre>

@@ -1,0 +1,68 @@
+---
+layout: post
+title: Installing Opencv3.1.0 on ubuntu
+---
+<pre>
+Removing  older versions of OpenCV
+There are 2 methods of removing your old installation of OpenCV, and they depend on how have you had OpenCV installed in first place!
+
+1- If you have installed from Ubuntu’s repository (or package managers like apt or the package manager of any other distros): 
+
+In this case, it is as simple as removing OpenCV’s package using your package manager. For example, on Ubuntu based Linux systems you can write the following commands in your favorite terminal. Pres TAB a few times to see which packages are related to open cv:
+<code>$ sudo apt-get remove libopencv
+$ sudo apt-get remove opencv
+</code>
+2-If you have installed from source (using make/make install):
+
+In this case, the make command should have created an uninstall profile for you. So to remove OpenCV, go to the folder that you have compiled OpenCV (the place you had called make/make install) and execute the following command:
+
+
+<code>$ sudo make uninstall
+</code>
+NOTE: If you do not remember how have you installed OpenCV, or none of the above method works for you, you can use the following command to delete any file that has something to do with OpenCV. Please note that removing files can be dangerous so do this on your own risk! I take no responsibility! 🙂
+<code>
+$ sudo find / -name "*opencv*" -exec rm -i {} \;
+$ sudo ldconfig && sudo ldconfig -vp
+</code>
+The first command will look for any file that contains “opencv” in its name and will remove it. The second line will update the linker cache to possibly reflect the removal of OpenCV and update the shared libraries.
+Preparation
+install build tools
+<code>
+$sudo apt-get install build-essential
+$ sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+</code>
+download source
+<code>
+/opt$ git clone https://github.com/Itseez/opencv.git
+/opt$ git clone https://github.com/Itseez/opencv_contrib.git
+
+/opt$ cd opencv
+/opt/opencv$ git checkout 3.1.0
+/opt/opencv$ cd /opt/opencv_contrib
+/opt/opencv_contrib$ git checkout 3.1.0
+/opt/opencv_contrib$ cd /opt/opencv
+</code>
+make and install
+<code>
+/opt/opencv$ mkdir release
+/opt/opencv$ cd release
+/opt/opencv/release$
+
+/opt/opencv/release$ cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib/modules /opt/opencv/
+
+/opt/opencv/release$ make
+/opt/opencv/release$ sudo make install
+</code>
+configure OpenCV
+create /etc/ld.so.conf.d/opencv.conf
+add "/usr/local/lib" in opencv.conf
+run following command
+sudo ldconfig
+
+edit /etc/bash.bashrc
+Add these two lines at the end of the file and save it:
+PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH
+
+finally restart or logout and login
+</pre>

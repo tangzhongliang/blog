@@ -1,4 +1,5 @@
 #!/bin/bash
+IFS=''
 read name
 time=$(date "+20%y-%m-%d")
 filename="${time}-${name}.html"

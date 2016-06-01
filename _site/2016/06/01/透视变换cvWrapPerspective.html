@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
+<head>
+   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+   <title>透视变换cvWrapPerspective</title>
+   <meta name="author" content="唐中良" />
+   <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
+   <!-- syntax highlighting CSS -->
+   <link rel="stylesheet" href="/blog/css/syntax.css" type="text/css" />
+
+   <!-- Homepage CSS -->
+   <link rel="stylesheet" href="/blog/css/screen.css" type="text/css" media="screen, projection" />
+
+   <!-- Typekit -->
+   <script type="text/javascript" src="http://use.typekit.com/jpd0pfm.js"></script>
+   <script type="text/javascript">try{Typekit.load();}catch(e){}</script>
+</head>
+<body>
+
+<!-- ClickTale Top part -->
+<script type="text/javascript">
+var WRInitTime=(new Date()).getTime();
+</script>
+<!-- ClickTale end of Top part -->
+
+<div class="site">
+  <div class="title">
+	  <a class="extra" href="/blog">首页</a>
+  </div>
+  
+  <div id="post">
+<h2 class="title">透视变换cvWrapPerspective </h2>
+<pre>
+透视变换（单应性？）能提供更大的灵活性，但是一个透视投影并不是线性变换，因此所采用的映射矩阵是3*3，且控点变为4个，其他方面与仿射变换完全类似，下面的例程是针对密集变换，稀疏图像变换则采用cvPerspectiveTransform函数来处理。
+------------------------------------------------------------------------------------------------
+WarpPerspective
+对图像进行透视变换
+void cvWarpPerspective( const CvArr* src, CvArr* dst,const CvMat* map_matrix,
+                       int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                       CvScalar fillval=cvScalarAll(0) );
+src
+输入图像.
+dst
+输出图像.
+map_matrix
+3×3 变换矩阵
+flags
+插值方法和以下开关选项的组合:
+·       CV_WARP_FILL_OUTLIERS- 填充所有缩小图像的象素。如果部分象素落在输入图像的边界外，那么它们的值设定为 fillval.
+·       CV_WARP_INVERSE_MAP- 指定 matrix 是输出图像到输入图像的反变换，因此可以直接用来做象素插值。否则, 函数从 map_matrix 得到反变换。
+fillval
+用来填充边界外面的值
+函数 cvWarpPerspective 利用下面指定矩阵变换输入图像：dst(x1,y1)-src(x,y)
+如果没有指定 CV_WARP_INVERSE_MAP ， 
+否则， 
+要变换稀疏矩阵，使用 cxcore 中的函数 cvTransform 。
+-----------------------------
+GetPerspectiveTransform
+由四对点计算透射变换
+CvMat* cvGetPerspectiveTransform( const CvPoint2D32f*src, const CvPoint2D32f* dst,
+                                  CvMat*map_matrix );
+ 
+#define cvWarpPerspectiveQMatrixcvGetPerspectiveTransform
+src
+输入图像的四边形顶点坐标。
+dst
+输出图像的相应的四边形顶点坐标。
+map_matrix
+指向3×3输出矩阵的指针。
+函数cvGetPerspectiveTransform计算满足以下关系的透射变换矩阵：
+
+这里,dst(i)= (x'i,y'i),src(i)= (xi,yi),i = 0..3.
+<code>
+#include <highgui.h>
+#include <cv.h>
+
+int main(int argc, char** argv)
+{
+	CvPoint2D32f srcTri[4], dstTri[4]; //二维坐标下的点，类型为浮点
+	//CvMat* rot_mat = cvCreateMat( 2, 3, CV_32FC1 );  //多通道矩阵
+	CvMat* warp_mat = cvCreateMat( 3, 3, CV_32FC1 );
+	IplImage *src, *dst;
+
+	if( argc == 2 && ( ( src = cvLoadImage( argv[1], 1 ) ) != 0 ) )
+	{
+		dst = cvCloneImage( src );  //制作图像的完整拷贝
+		dst ->origin = src ->origin;  
+		/*
+		int origin; /* 0 - 顶—左结构,
+		1 - 底—左结构 (Windows bitmaps 风格) 
+		*/
+		cvZero( dst );  //清空数组
+
+		//计算矩阵仿射变换
+		srcTri[0].x = 0;
+		srcTri[0].y = 0;
+		srcTri[1].x = src -> width - 1;  //缩小一个像素
+		srcTri[1].y = 0;
+		srcTri[2].x = 0;
+		srcTri[2].y = src -> height - 1;
+		srcTri[3].x = src -> width - 1;  //bot right
+		srcTri[3].y = src -> height - 1;
+
+		//改变目标图像大小
+		dstTri[0].x = src -> width * 0.05;
+		dstTri[0].y = src -> height * 0.33;
+		dstTri[1].x = src -> width * 0.9;
+		dstTri[1].y = src -> height * 0.25;
+		dstTri[2].x = src -> width * 0.2;
+		dstTri[2].y = src -> height * 0.7;
+		dstTri[3].x = src -> width * 0.8;
+		dstTri[3].y = src -> height * 0.9;
+
+		cvGetPerspectiveTransform( srcTri, dstTri, warp_mat );  //由三对点计算仿射变换 
+		cvWarpPerspective( src, dst, warp_mat );  //对图像做仿射变换
+
+		//输出
+		cvNamedWindow( "Perspective Warp", 1 );
+		cvShowImage( "Perspective Warp", dst );  //最终是输出dst 
+		cvWaitKey();
+	}
+	cvReleaseImage( &dst );
+	cvReleaseMat( &warp_mat );
+
+	return 0;
+}
+</code>
+原文地址:<a href="http://blog.csdn.net/hitwengqi/article/details/6890220">http://blog.csdn.net/hitwengqi/article/details/6890220</a>
+</pre>
+
+</div>
+
+<div id="related">
+  <h2>Related Posts</h2>
+  <ul class="posts">
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/%E5%9B%BE%E7%89%87%E8%A3%81%E5%89%AA%E6%88%90%E4%BB%BB%E6%84%8F%E5%BD%A2%E7%8A%B6.html">图片裁剪成任意形状</a></li>
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/opencv-%E8%BD%AE%E5%BB%93%E6%A3%80%E6%B5%8B.html">opencv 轮廓检测</a></li>
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/Installing-Opencv3.1.0-on-ubuntu.html">Installing Opencv3.1.0 on ubuntu</a></li>
+    
+  </ul>
+</div>
+
+  <div class="contact">
+      
+  <!--</div>
+    <div class="rss">
+      <a href="/">
+	      <img src="/blog/images/rss.png" alt="Subscribe to RSS Feed" />
+      </a>
+    </div>
+    -->
+  </div>
+</div>
+
+<a href="#"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub" /></a>
+
+<!-- ClickTale Bottom part -->
+<div id="ClickTaleDiv" style="display: none;"></div>
+<script type="text/javascript">
+if(document.location.protocol!='https:')
+  document.write(unescape("%3Cscript%20src='http://s.clicktale.net/WRb.js'%20type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+if(typeof ClickTale=='function') ClickTale(206,0.3,"www03");
+</script>
+<!-- ClickTale end of Bottom part -->
+
+<!-- Google Analytics -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-6016902-1");
+pageTracker._trackPageview();
+</script>
+<!-- Google Analytics end -->
+
+</body>
+</html>
