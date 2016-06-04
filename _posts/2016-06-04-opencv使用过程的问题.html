@@ -1,0 +1,22 @@
+---
+layout: post
+title: opencv使用过程的问题
+---
+<pre>
+Stack frame #00 pc /system/lib64/libc.so (memcpy)
+len=240w
+经过测试，发现读取过程没问题
+同时读写时，循环到70w时,打印出init success后中断
+<code>
+LOGI(int2string(len));
+char tmp;
+for(int i=0;i<len;i++){
+LOGI(int2string(i));
+tmp= srcImg->imageDataOrigin[i];
+LOGI("read success");
+//out[i] = tmp;
+//LOGI("init success");
+
+}
+</code>
+</pre>
