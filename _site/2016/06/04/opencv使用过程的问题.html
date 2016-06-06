@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN" lang="zh-CN">
 <head>
    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-   <title>ubuntu如何正确搭配jekyll环境</title>
+   <title>opencv使用过程的问题</title>
    <meta name="author" content="唐中良" />
    <!--<link href="http://feeds.feedburner.com/tom-preston-werner" rel="alternate" title="Tom Preston-Werner" type="application/atom+xml" />-->
    <!-- syntax highlighting CSS -->
@@ -29,16 +29,24 @@ var WRInitTime=(new Date()).getTime();
   </div>
   
   <div id="post">
-<h2 class="title">ubuntu如何正确搭配jekyll环境 </h2>
+<h2 class="title">opencv使用过程的问题 </h2>
 <pre>
-sudo apt-get install ruby ruby-dev make gcc nodejs
-将gem的源库由Https改为http
-gem sources --remove https://rubygems.org/
-gem sources -a http://ruby.taobao.org/
-sudo gem install jekyll
-进入项目根目录执行命令
-jekyll serve
-在浏览器中访问http://localhost:4000/project/ project改为你的项目名称
+Stack frame #00 pc /system/lib64/libc.so (memcpy)
+len=240w
+经过测试，发现读取过程没问题
+同时读写时，循环到70w时,打印出init success后中断
+<code>
+LOGI(int2string(len));
+char tmp;
+for(int i=0;i<len;i++){
+LOGI(int2string(i));
+tmp= srcImg->imageDataOrigin[i];
+LOGI("read success");
+//out[i] = tmp;
+//LOGI("init success");
+
+}
+</code>
 </pre>
 
 </div>
@@ -49,9 +57,9 @@ jekyll serve
     
       <li><span>06 Jun 2016</span> &raquo; <a href="/2016/06/06/MediaPlayer%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90.html">MediaPlayer源码解析</a></li>
     
-      <li><span>04 Jun 2016</span> &raquo; <a href="/2016/06/04/opencv%E4%BD%BF%E7%94%A8%E8%BF%87%E7%A8%8B%E7%9A%84%E9%97%AE%E9%A2%98.html">opencv使用过程的问题</a></li>
-    
       <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/%E9%80%8F%E8%A7%86%E5%8F%98%E6%8D%A2cvWrapPerspective.html">透视变换cvWrapPerspective</a></li>
+    
+      <li><span>01 Jun 2016</span> &raquo; <a href="/2016/06/01/%E5%9B%BE%E7%89%87%E8%A3%81%E5%89%AA%E6%88%90%E4%BB%BB%E6%84%8F%E5%BD%A2%E7%8A%B6.html">图片裁剪成任意形状</a></li>
     
   </ul>
 </div>

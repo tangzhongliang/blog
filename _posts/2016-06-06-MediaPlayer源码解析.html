@@ -1,0 +1,90 @@
+---
+layout: post
+title: MediaPlayer源码解析
+---
+<pre>
+MediaPlayer.java native_init
+jni android_media_MediaPlayer_native_setup
+jni new MediaPlayer
+setDataSource:
+MediaPlayer.java setDataSource
+jni android_media_MediaPlayer_setDataSourceAndHeaders;
+jni mp->setDataSource
+mediaPlayer.cpp {
+	(MediaPlayerService)player getMediaPlayerService->create
+		player->setDataSource
+}
+MediaPlayerService.cpp {
+	(StagefrightPlayer|NuPlayerDriver|)p setDataSource_pre{ createPlayer{sFactoryMap.valueFor(playerType).createPlayer; }}
+	p->setDataSource setDataSource_post{mPlayer = p}
+}
+StagefrightPlayer.cpp Construct{mPlayer = new AweSomePlayer()}
+mPlayer.setDataSource
+
+AweSomePlayer.cpp {
+	setDataSource_l(fd) {
+		new FileSource
+			setDataSource_l(source){MediaExtractor::create setDataSource_l(extractor)(init mAudioTrack,mVideoTrack,height,width,mDurationUs,mBitrate)} }
+	setDataSource_l(http){init mHttpserveice,mUri,mUriHeaders}
+}
+
+prepare:
+与setDataSource一样的步骤
+AweSomePlayer.cpp {
+	prepareAsync_l{
+		mQueue.start();
+		mAsyncPrepareEvent = new AwesomeEvent(
+				this, &AwesomePlayer::onPrepareAsyncEvent);
+		mQueue.postEvent(mAsyncPrepareEvent);
+	}
+	onPrepareAsyncEvent{
+		beginPrepareAsync_l{
+			finishSetDataSource_l;
+			initVideoDecoder{
+				mVideoSource = OMXCodec::Create(
+						mClient.interface(), mVideoTrack->getFormat(),
+						false, // createEncoder
+						mVideoTrack,
+						NULL, flags, USE_SURFACE_ALLOC
+						? mNativeWindow : NULL){mSource=mVideoTrack};
+				mSource->start();
+			};
+			initAudioDecoder;
+		}
+
+	}
+}
+MPEG4Extractor.cpp{
+	mGroup = new MediaBufferGroup;
+	mGroup->add_buffer(new MediaBuffer(max_size));
+
+	mSrcBuffer = new (std::nothrow) uint8_t[max_size];
+}
+
+start:
+AweSomePlayer.cpp {
+	play(){
+		play_l{
+			if (mVideoSource != NULL) {
+				// Kick off video playback
+				postVideoEvent_l();
+
+				if (mAudioSource != NULL && mVideoSource != NULL) {
+					postVideoLagEvent_l();
+				}
+			}
+			if (isStreamingHTTP()) {
+				postBufferingEvent_l();
+			}
+		}
+		onVideoEnvent{
+			mVideoSource->read(mVideoBuffer)
+		}
+	}
+
+}
+OMXCodec.cpp{
+	read(MediaBuffer **buffer, const ReadOptions *options)
+}
+
+</pre>
