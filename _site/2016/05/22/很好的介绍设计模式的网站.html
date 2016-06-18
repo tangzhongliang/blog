@@ -32,6 +32,25 @@ var WRInitTime=(new Date()).getTime();
 <h2 class="title">很好的介绍设计模式的网站 </h2>
 <p>
 <a href="http://www.runoob.com/design-pattern/design-pattern-tutorial.html">http://www.runoob.com/design-pattern/design-pattern-tutorial.html</a>
+<ul>
+	<li>命令模式</li>
+	应用场景：软件系统中，行为请求与行为执行是紧耦合的，不能够进行记录、撤销或事务处理；
+	设计实现：请求体，执行请求的对象，对象．例子：ThreadPool(对象是可访问的局部或全局变量),Volley Request(对象是本身)
+	<li>模板模式</li>
+	设计操作的骨架，具体步骤实现交给子类；例子：框架，继承
+	<li>服务定位器模式</li>
+	service,cache,服务创建，服务定位器
+	服务定位器根据serviceName，从cache用于获取服务，没有找到，使用服务器创建对象，创建服务，并加入cache
+	例子：图片缓存，android service (服务创建使用了命令模式，封装create()创建与实例，放入cache中).服务创建可以集成到一个类中，也可以android service那样，与实例封装到一个对象中
+	<li>装饰器模式</li>
+	是继承的一个替代模式,是对一个类进行功能扩展，装饰类与被装饰类是依赖关系
+	<li>迭代器模式</li>
+	对访问集合提供一个统一的访问方式，与集合的具体类型是解耦的
+	<li>状态模式</li>
+	把条件转换成对象，对外提供统一接口,把状态和行为封装到一个对象中，条件和对象的对应可以采用注册的方式(android service),通过hashmap保存条件和对象,(通过类路经加载和实例化对象)
+	<li>策略模式</li>
+	与状态模式很像
+</ul>
 </p>
 
 </div>
